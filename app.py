@@ -12,16 +12,26 @@ def index():
                            city_name=app.config['CITY_NAME'],
                            recent_searches=[])
 
+@app.route('/api/get-area-id')
+def get_area_id():
+    city = request.args.get('city', app.config['CITY_NAME'])
+    
+    area_id = get_city_area_id(city)
+    if not area_id:
+        return jsonify({"error": f"Could not find boundary for {city}"}), 404
+    
+    return jsonify({"area_id": area_id, "city": city})
+
 @app.route('/api/search')
 def api_search():
     category = request.args.get('category')
-    city = app.config['CITY_NAME']
+    city = request.args.get('city', app.config['CITY_NAME'])
     
     area_id = get_city_area_id(city)
     if not area_id:
         return jsonify({"error": f"Could not find boundary for {city}"}), 404
         
-    results = search_places(area_id, category)
+    results = search_places(area_id, category, city)
     
     if isinstance(results, tuple):
         return jsonify(results[0]), results[1]

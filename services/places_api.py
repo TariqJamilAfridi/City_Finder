@@ -157,34 +157,36 @@ def search_places_nominatim(city_name, category):
         print(f"Nominatim API error: {e}")
         return None  # Signal to use fallback
 
-def search_places(area_id, category):
+def search_places(area_id, category, city_name=None):
     """
     Primary search function with fallback to demo data
     """
-    from config import Config
-    city_name = Config.CITY_NAME
+    if not city_name:
+        from config import Config
+        city_name = Config.CITY_NAME
     
     print(f"Searching for {category} in {city_name}...")
     
     # Try Nominatim API first
     results = search_places_nominatim(city_name, category)
     
-    # If API failed, use demo data
+    # If API failed, use demo data only for Karachi
     if results is None or (isinstance(results, tuple) and results[1] >= 400):
-        print(f"API unavailable, using demo data for {category}")
-        demo_results = get_demo_data(category)
-        if demo_results:
-            return demo_results
-        else:
-            return {"error": f"Service temporarily unavailable. Please try again later."}, 503
+        print(f"API unavailable for {city_name}")
+        if city_name.lower() == 'karachi':
+            demo_results = get_demo_data(category)
+            if demo_results:
+                return demo_results
+        return {"error": f"Service temporarily unavailable for {city_name}. Please try again later."}, 503
     
     if len(results) > 0:
         print(f"Found {len(results)} places using Nominatim")
         return results
     else:
-        # No results from API, try demo data
-        print(f"No API results, using demo data for {category}")
-        demo_results = get_demo_data(category)
-        if demo_results:
-            return demo_results
+        # No results from API
+        print(f"No API results for {category} in {city_name}")
+        if city_name.lower() == 'karachi':
+            demo_results = get_demo_data(category)
+            if demo_results:
+                return demo_results
         return {"error": f"No {category} found in {city_name}"}, 404
