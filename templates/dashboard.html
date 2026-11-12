@@ -6,13 +6,62 @@
     <title>Dashboard - CityFinder</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        #map { height: 600px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        #map { height: 600px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; }
         .category-btn { margin: 5px; border-radius: 20px; }
         .result-card { cursor: pointer; transition: transform 0.2s; margin-bottom: 15px;}
         .result-card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .results-container { max-height: 600px; overflow-y: auto; }
+        
+        /* Style the routing control */
+        .leaflet-routing-container {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .leaflet-routing-alt {
+            background: white;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+        }
+        
+        /* Hide some routing UI elements for cleaner look */
+        .leaflet-routing-alternatives-container {
+            display: none;
+        }
+        
+        /* Location button */
+        .locate-btn {
+            position: absolute;
+            top: 80px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .locate-btn:hover {
+            background: #f4f4f4;
+        }
+        
+        /* Custom location marker */
+        .user-location-marker {
+            background: #4285f4;
+            border: 3px solid white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            box-shadow: 0 0 10px rgba(66, 133, 244, 0.5);
+        }
     </style>
 </head>
 <body class="bg-light">
@@ -64,12 +113,18 @@
 
             <!-- Right Panel: Interactive Map -->
             <div class="col-md-7">
-                <div id="map"></div>
+                <div style="position: relative;">
+                    <button class="locate-btn" onclick="getUserLocation()" title="Get my location">
+                        <i class="fas fa-crosshairs"></i> My Location
+                    </button>
+                    <div id="map"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     <script>
         const categories = ["Restaurants", "Mosques", "Banks", "Hospitals", "ATMs", "Petrol stations", "Pharmacies", "Hotels", "Shopping malls", "Schools", "Universities", "Parks", "Bus stations"];
         
@@ -88,6 +143,9 @@
         }).addTo(map);
         let markers = [];
         let markerGroup = L.featureGroup().addTo(map);
+        let userLocation = null;
+        let userLocationMarker = null;
+        let currentRouting = null;
 
         async function performSearch(category) {
             document.getElementById('loading').classList.remove('d-none');
@@ -132,21 +190,155 @@
                     <div class="card-body">
                         <h6 class="card-title fw-bold text-primary">${place.name}</h6>
                         <p class="card-text small text-muted mb-2"><i class="fas fa-map-marker-alt"></i> ${place.address}</p>
-                        <a href="https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=%3B${place.lat}%2C${place.lon}" target="_blank" class="btn btn-sm btn-success">Directions</a>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-primary view-btn" data-index="${index}">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button class="btn btn-sm btn-success directions-btn" data-lat="${place.lat}" data-lon="${place.lon}" data-name="${place.name}">
+                                <i class="fas fa-directions"></i> Directions
+                            </button>
+                        </div>
                     </div>
                 `;
-                
-                card.onclick = (e) => {
-                    if (e.target.tagName !== 'A') {
-                        map.setView([place.lat, place.lon], 16);
-                        marker.openPopup();
-                    }
-                };
                 
                 container.appendChild(card);
             });
 
             map.fitBounds(markerGroup.getBounds(), { padding: [50, 50] });
+            
+            // Add click handlers for buttons
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const index = parseInt(btn.dataset.index);
+                    const place = data[index];
+                    map.setView([place.lat, place.lon], 16);
+                    markers[index].openPopup();
+                });
+            });
+            
+            document.querySelectorAll('.directions-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const lat = parseFloat(btn.dataset.lat);
+                    const lon = parseFloat(btn.dataset.lon);
+                    const name = btn.dataset.name;
+                    getDirections(lat, lon, name);
+                });
+            });
+        }
+        
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                document.querySelector('.locate-btn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation = [position.coords.latitude, position.coords.longitude];
+                        
+                        // Remove old marker if exists
+                        if (userLocationMarker) {
+                            map.removeLayer(userLocationMarker);
+                        }
+                        
+                        // Add custom marker for user location
+                        const customIcon = L.divIcon({
+                            className: 'user-location-marker',
+                            iconSize: [20, 20]
+                        });
+                        
+                        userLocationMarker = L.marker(userLocation, { icon: customIcon })
+                            .bindPopup('<strong>You are here!</strong>')
+                            .addTo(map);
+                        
+                        map.setView(userLocation, 14);
+                        userLocationMarker.openPopup();
+                        
+                        document.querySelector('.locate-btn').innerHTML = '<i class="fas fa-crosshairs"></i> My Location';
+                    },
+                    (error) => {
+                        alert('Unable to get your location. Please enable location services.');
+                        document.querySelector('.locate-btn').innerHTML = '<i class="fas fa-crosshairs"></i> My Location';
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by your browser.');
+            }
+        }
+        
+        function getDirections(destLat, destLon, destName) {
+            if (!userLocation) {
+                alert('Please enable your location first by clicking "My Location" button.');
+                return;
+            }
+            
+            // Remove previous routing if exists
+            if (currentRouting) {
+                map.removeControl(currentRouting);
+            }
+            
+            // Create routing control
+            currentRouting = L.Routing.control({
+                waypoints: [
+                    L.latLng(userLocation[0], userLocation[1]),
+                    L.latLng(destLat, destLon)
+                ],
+                routeWhileDragging: false,
+                showAlternatives: false,
+                addWaypoints: false,
+                lineOptions: {
+                    styles: [{color: '#2196F3', opacity: 0.8, weight: 6}]
+                },
+                createMarker: function(i, waypoint, n) {
+                    const isStart = i === 0;
+                    const marker = L.marker(waypoint.latLng, {
+                        draggable: false,
+                        icon: L.icon({
+                            iconUrl: isStart 
+                                ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png'
+                                : 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34],
+                            shadowSize: [41, 41]
+                        })
+                    });
+                    
+                    if (isStart) {
+                        marker.bindPopup('<strong>Your Location</strong>');
+                    } else {
+                        marker.bindPopup(`<strong>${destName}</strong><br>Destination`);
+                    }
+                    
+                    return marker;
+                }
+            }).addTo(map);
+            
+            // Listen for route found event
+            currentRouting.on('routesfound', function(e) {
+                const routes = e.routes;
+                const summary = routes[0].summary;
+                const distance = (summary.totalDistance / 1000).toFixed(2);
+                const time = Math.round(summary.totalTime / 60);
+                
+                const msg = `
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-route"></i> Route Found!</h6>
+                        <p class="mb-1"><strong>Distance:</strong> ${distance} km</p>
+                        <p class="mb-0"><strong>Time:</strong> ~${time} minutes</p>
+                    </div>
+                `;
+                
+                // Show route info
+                setTimeout(() => {
+                    const routingContainer = document.querySelector('.leaflet-routing-container');
+                    if (routingContainer) {
+                        routingContainer.style.maxHeight = '300px';
+                        routingContainer.style.overflowY = 'auto';
+                    }
+                }, 500);
+            });
         }
     </script>
 </body>
