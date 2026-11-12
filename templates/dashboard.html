@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - CityFinder</title>
+    <title>CityFinder - Find Places Near You</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
@@ -274,9 +274,89 @@
             font-weight: 600;
             text-align: center;
         }
+        
+        /* Quick actions */
+        .quick-actions {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2000;
+        }
+        
+        .quick-action-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .quick-action-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+        
+        .quick-action-btn i {
+            font-size: 24px;
+        }
+        
+        /* Large icon mode */
+        body.large-icons .category-btn {
+            font-size: 1.2rem;
+            padding: 15px 30px;
+        }
+        
+        body.large-icons .result-card {
+            font-size: 1.1rem;
+        }
+        
+        body.large-icons .place-name {
+            font-size: 1.4rem;
+        }
+        
+        /* Category icons */
+        .category-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .category-btn-large {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-width: 150px;
+        }
+        
+        /* Simplified mode */
+        body.simplified-mode .results-container {
+            font-size: 1.2rem;
+        }
+        
+        body.simplified-mode .btn {
+            font-size: 1.1rem;
+            padding: 12px 24px;
+        }
     </style>
 </head>
 <body>
+    <!-- Quick Actions Sidebar -->
+    <div class="quick-actions">
+        <div class="quick-action-btn" onclick="toggleSimplifiedMode()" title="Simple Mode">
+            <i class="fas fa-text-height"></i>
+        </div>
+    </div>
+
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
@@ -339,14 +419,43 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
     <script>
-        const categories = ["Restaurants", "Mosques", "Banks", "Hospitals", "ATMs", "Petrol stations", "Pharmacies", "Hotels", "Shopping malls", "Schools", "Universities", "Parks", "Bus stations"];
+        // Category data with icons
+        const categoryData = {
+            "Restaurants": { icon: "🍔", color: "#ff6b6b" },
+            "Mosques": { icon: "🕌", color: "#4ecdc4" },
+            "Banks": { icon: "🏦", color: "#45b7d1" },
+            "Hospitals": { icon: "🏥", color: "#f06292" },
+            "ATMs": { icon: "💳", color: "#ab47bc" },
+            "Petrol stations": { icon: "⛽", color: "#ff9800" },
+            "Pharmacies": { icon: "💊", color: "#26a69a" },
+            "Hotels": { icon: "🏨", color: "#5c6bc0" },
+            "Shopping malls": { icon: "🛍️", color: "#ec407a" },
+            "Schools": { icon: "🏫", color: "#66bb6a" },
+            "Universities": { icon: "🎓", color: "#42a5f5" },
+            "Parks": { icon: "🌳", color: "#8bc34a" },
+            "Bus stations": { icon: "🚌", color: "#ffa726" }
+        };
+        
+        const categories = Object.keys(categoryData);
+        
+        // Toggle simplified mode
+        function toggleSimplifiedMode() {
+            document.body.classList.toggle('simplified-mode');
+            document.body.classList.toggle('large-icons');
+        }
         
         const catContainer = document.getElementById('categories');
         categories.forEach(cat => {
+            const data = categoryData[cat];
             const btn = document.createElement('button');
-            btn.className = 'btn btn-outline-primary btn-sm category-btn';
-            btn.innerText = cat;
-            btn.onclick = () => performSearch(cat);
+            btn.className = 'btn btn-outline-primary btn-sm category-btn category-btn-large';
+            btn.innerHTML = `
+                <span class="category-icon">${data.icon}</span>
+                <span>${cat}</span>
+            `;
+            btn.onclick = () => {
+                performSearch(cat);
+            };
             catContainer.appendChild(btn);
         });
 
