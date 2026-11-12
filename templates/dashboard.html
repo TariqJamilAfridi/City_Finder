@@ -9,30 +9,143 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        #map { height: 600px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative; }
-        .category-btn { margin: 5px; border-radius: 20px; }
-        .result-card { cursor: pointer; transition: transform 0.2s; margin-bottom: 15px;}
-        .result-card:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .results-container { max-height: 600px; overflow-y: auto; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
         
-        /* Style the routing control */
-        .leaflet-routing-container {
+        .main-container {
             background: white;
-            padding: 10px;
+            border-radius: 20px;
+            margin: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        #map { 
+            height: 600px; 
+            border-radius: 15px; 
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border: 3px solid #fff;
+        }
+        
+        .category-btn { 
+            margin: 5px; 
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 2px solid #667eea;
+        }
+        
+        .category-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            background: #667eea !important;
+            color: white !important;
+        }
+        
+        .result-card { 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            margin-bottom: 15px;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            overflow: hidden;
+        }
+        
+        .result-card:hover { 
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+        }
+        
+        .result-card .card-body {
+            padding: 15px;
+        }
+        
+        .results-container { 
+            max-height: 600px; 
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        
+        .results-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .results-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .results-container::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+        
+        .results-container::-webkit-scrollbar-thumb:hover {
+            background: #5568d3;
+        }
+        
+        /* Navbar styling */
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* Category section */
+        .category-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        /* Distance badge */
+        .distance-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        
+        .distance-badge i {
+            margin-right: 4px;
+        }
+        
+        /* Buttons */
+        .view-btn, .directions-btn {
+            transition: all 0.3s ease;
+            font-weight: 500;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
         
-        .leaflet-routing-alt {
-            background: white;
-            padding: 8px;
-            margin-top: 5px;
-            border-radius: 5px;
+        .view-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
         }
         
-        /* Hide some routing UI elements for cleaner look */
-        .leaflet-routing-alternatives-container {
-            display: none;
+        .view-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .directions-btn {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border: none;
+        }
+        
+        .directions-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4);
         }
         
         /* Location button */
@@ -42,72 +155,172 @@
             right: 10px;
             z-index: 1000;
             background: white;
-            border: 2px solid rgba(0,0,0,0.2);
-            border-radius: 4px;
-            padding: 8px 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 10px 15px;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
         
         .locate-btn:hover {
-            background: #f4f4f4;
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .locate-btn.enabled {
+            background: #38ef7d;
+            color: white;
+            border-color: #38ef7d;
+        }
+        
+        /* Leaflet routing customization */
+        .leaflet-routing-container {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .leaflet-routing-alt {
+            background: #f8f9fa;
+            padding: 12px;
+            margin-top: 8px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .leaflet-routing-alternatives-container {
+            display: none;
         }
         
         /* Custom location marker */
         .user-location-marker {
-            background: #4285f4;
+            background: #667eea;
             border: 3px solid white;
             border-radius: 50%;
             width: 20px;
             height: 20px;
-            box-shadow: 0 0 10px rgba(66, 133, 244, 0.5);
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.6);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 15px rgba(102, 126, 234, 0.6);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(102, 126, 234, 0.9);
+            }
+            100% {
+                box-shadow: 0 0 15px rgba(102, 126, 234, 0.6);
+            }
+        }
+        
+        /* Loading spinner */
+        .spinner-border {
+            color: #667eea !important;
+        }
+        
+        /* Place name styling */
+        .place-name {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        
+        /* Address styling */
+        .place-address {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        /* Stats badge */
+        .stats-badge {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: inline-block;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+        
+        /* Welcome section */
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .welcome-section h4 {
+            font-weight: 700;
+        }
+        
+        /* Results header */
+        .results-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-align: center;
         }
     </style>
 </head>
-<body class="bg-light">
+<body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="#"><i class="fas fa-map-marker-alt"></i> CityFinder</a>
+            <a class="navbar-brand fw-bold fs-4" href="#">
+                <i class="fas fa-map-marker-alt"></i> CityFinder
+            </a>
             <div class="d-flex align-items-center">
-                <span class="text-white me-3">Exploring: <strong>{{ city_name }}</strong></span>
+                <span class="text-white me-3">
+                    <i class="fas fa-city"></i> <strong>{{ city_name }}</strong>
+                </span>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid px-4">
+    <div class="container-fluid px-4 main-container">
         <div class="row">
             <!-- Left Panel: Controls and Results -->
             <div class="col-md-5">
-                <div class="card mb-4 shadow-sm">
-                    <div class="card-body">
-                        <h4 class="card-title mb-2 text-primary"><i class="fas fa-compass"></i> Welcome to CityFinder!</h4>
-                        <p class="text-muted mb-3">Discover essential locations and services in <strong>{{ city_name }}</strong></p>
-                        <h5 class="card-title mb-3">What are you looking for?</h5>
-                        <div id="categories" class="d-flex flex-wrap">
-                            <!-- Categories generated by JS -->
-                        </div>
-                        
-                        {% if recent_searches %}
-                        <div class="mt-3" id="recent-searches">
-                            <small class="text-muted">Recent:</small>
-                            {% for search in recent_searches %}
-                                <span class="badge bg-secondary ms-1">{{ search }}</span>
-                            {% endfor %}
-                        </div>
-                        {% endif %}
+                <div class="welcome-section">
+                    <h4 class="mb-2"><i class="fas fa-compass"></i> Welcome to CityFinder!</h4>
+                    <p class="mb-0">Discover essential locations and services in <strong>{{ city_name }}</strong></p>
+                </div>
+
+                <div class="category-section">
+                    <h5 class="mb-3"><i class="fas fa-th-large"></i> What are you looking for?</h5>
+                    <div id="categories" class="d-flex flex-wrap">
+                        <!-- Categories generated by JS -->
                     </div>
                 </div>
 
                 <div id="loading" class="text-center d-none my-4">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <p class="mt-2 text-muted">Searching entire city via OpenStreetMap...</p>
+                    <div class="spinner-border" role="status" style="width: 3rem; height: 3rem;"></div>
+                    <p class="mt-3 text-muted fw-bold">
+                        <i class="fas fa-search"></i> Searching entire city via OpenStreetMap...
+                    </p>
                 </div>
 
                 <div id="error-message" class="alert alert-danger d-none"></div>
 
-                <div class="results-container pe-2" id="results-list">
-                    <p class="text-muted text-center mt-5">Select a category to view locations.</p>
+                <div class="results-container" id="results-list">
+                    <div class="text-center mt-5" style="opacity: 0.6;">
+                        <i class="fas fa-hand-pointer fa-3x mb-3" style="color: #667eea;"></i>
+                        <p class="text-muted">Select a category above to discover locations</p>
+                    </div>
                 </div>
             </div>
 
@@ -153,6 +366,28 @@
                 getUserLocation(true); // Auto-detect silently
             }, 1000);
         });
+        
+        // Function to calculate distance between two points (Haversine formula)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in kilometers
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            const distance = R * c;
+            return distance;
+        }
+        
+        // Function to format distance
+        function formatDistance(km) {
+            if (km < 1) {
+                return Math.round(km * 1000) + ' m';
+            } else {
+                return km.toFixed(1) + ' km';
+            }
+        }
 
         async function performSearch(category) {
             document.getElementById('loading').classList.remove('d-none');
@@ -179,11 +414,30 @@
         function displayResults(data, category) {
             const container = document.getElementById('results-list');
             if (data.length === 0) {
-                container.innerHTML = `<div class="alert alert-info">No ${category} found in the city.</div>`;
+                container.innerHTML = `
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> No ${category} found in the city.
+                    </div>`;
                 return;
             }
 
-            container.innerHTML = `<p class="text-success fw-bold">Found ${data.length} results for ${category}</p>`;
+            // Calculate distances if user location is available
+            if (userLocation) {
+                data.forEach(place => {
+                    place.distance = calculateDistance(
+                        userLocation[0], userLocation[1],
+                        place.lat, place.lon
+                    );
+                });
+                // Sort by distance (nearest first)
+                data.sort((a, b) => a.distance - b.distance);
+            }
+
+            container.innerHTML = `
+                <div class="results-header">
+                    <i class="fas fa-check-circle"></i> Found ${data.length} ${category}
+                    ${userLocation ? ' <span style="opacity: 0.8;">(sorted by distance)</span>' : ''}
+                </div>`;
 
             data.forEach((place, index) => {
                 const marker = L.marker([place.lat, place.lon])
@@ -191,18 +445,29 @@
                     .addTo(markerGroup);
                 markers.push(marker);
 
+                const distanceHTML = place.distance 
+                    ? `<div class="distance-badge">
+                         <i class="fas fa-route"></i> ${formatDistance(place.distance)} away
+                       </div>` 
+                    : '';
+
                 const card = document.createElement('div');
                 card.className = 'card result-card';
                 card.innerHTML = `
                     <div class="card-body">
-                        <h6 class="card-title fw-bold text-primary">${place.name}</h6>
-                        <p class="card-text small text-muted mb-2"><i class="fas fa-map-marker-alt"></i> ${place.address}</p>
+                        ${distanceHTML}
+                        <h6 class="place-name">
+                            <i class="fas fa-map-pin"></i> ${place.name}
+                        </h6>
+                        <p class="place-address">
+                            <i class="fas fa-map-marker-alt"></i> ${place.address}
+                        </p>
                         <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-primary view-btn" data-index="${index}">
-                                <i class="fas fa-eye"></i> View
+                            <button class="btn btn-sm btn-primary view-btn flex-grow-1" data-index="${index}">
+                                <i class="fas fa-eye"></i> View on Map
                             </button>
-                            <button class="btn btn-sm btn-success directions-btn" data-lat="${place.lat}" data-lon="${place.lon}" data-name="${place.name}">
-                                <i class="fas fa-directions"></i> Directions
+                            <button class="btn btn-sm btn-success directions-btn flex-grow-1" data-lat="${place.lat}" data-lon="${place.lon}" data-name="${place.name}">
+                                <i class="fas fa-directions"></i> Get Directions
                             </button>
                         </div>
                     </div>
@@ -266,8 +531,10 @@
                         }
                         
                         document.querySelector('.locate-btn').innerHTML = '<i class="fas fa-check-circle"></i> Location Enabled';
-                        document.querySelector('.locate-btn').style.background = '#d4edda';
-                        document.querySelector('.locate-btn').style.color = '#155724';
+                        document.querySelector('.locate-btn').classList.add('enabled');
+                        document.querySelector('.locate-btn').style.background = '#38ef7d';
+                        document.querySelector('.locate-btn').style.color = 'white';
+                        document.querySelector('.locate-btn').style.borderColor = '#38ef7d';
                         
                         console.log('User location set:', userLocation);
                     },
@@ -360,15 +627,46 @@
                 const distance = (summary.totalDistance / 1000).toFixed(2);
                 const time = Math.round(summary.totalTime / 60);
                 
-                const msg = `
-                    <div class="alert alert-success">
-                        <h6><i class="fas fa-route"></i> Route Found!</h6>
-                        <p class="mb-1"><strong>Distance:</strong> ${distance} km</p>
-                        <p class="mb-0"><strong>Time:</strong> ~${time} minutes</p>
+                // Create a nice info box at the top of results
+                const routeInfo = document.createElement('div');
+                routeInfo.className = 'alert alert-success mb-3';
+                routeInfo.style.borderRadius = '12px';
+                routeInfo.style.border = '2px solid #38ef7d';
+                routeInfo.style.background = 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)';
+                routeInfo.style.color = 'white';
+                routeInfo.innerHTML = `
+                    <h5 class="mb-3"><i class="fas fa-route"></i> Route to ${destName}</h5>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
+                                <i class="fas fa-road fa-2x mb-2"></i>
+                                <h4 class="mb-0">${distance} km</h4>
+                                <small>Total Distance</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
+                                <i class="fas fa-clock fa-2x mb-2"></i>
+                                <h4 class="mb-0">~${time} min</h4>
+                                <small>Estimated Time</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-light btn-sm" onclick="clearRoute()">
+                            <i class="fas fa-times"></i> Clear Route
+                        </button>
                     </div>
                 `;
                 
-                // Show route info
+                // Insert at the top of results
+                const container = document.getElementById('results-list');
+                container.insertBefore(routeInfo, container.firstChild);
+                
+                // Smooth scroll to route info
+                routeInfo.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+                // Customize routing container appearance
                 setTimeout(() => {
                     const routingContainer = document.querySelector('.leaflet-routing-container');
                     if (routingContainer) {
@@ -377,6 +675,18 @@
                     }
                 }, 500);
             });
+        }
+        
+        function clearRoute() {
+            if (currentRouting) {
+                map.removeControl(currentRouting);
+                currentRouting = null;
+            }
+            // Remove route info box
+            const routeInfo = document.querySelector('.alert-success');
+            if (routeInfo && routeInfo.innerHTML.includes('Route to')) {
+                routeInfo.remove();
+            }
         }
     </script>
 </body>
