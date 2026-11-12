@@ -2,6 +2,14 @@
 
 **Find places near you easily!** 🗺️📍
 
+## 🌐 Live Demo
+
+**Try it now:** https://city-finder-k1d6.onrender.com/
+
+The application is deployed and fully functional - accessible from anywhere in the world!
+
+---
+
 CityFinder is a user-friendly web application that helps you discover essential locations and services in your city. Perfect for everyone - even if you've never used a computer before!
 
 ## 📖 Project Overview
@@ -89,12 +97,18 @@ CityFinder helps you find important places like:
 
 ## 🚀 Installation & Setup
 
-### Prerequisites
+### Quick Start - Use Live Demo
+
+**No installation needed!** Just visit: https://city-finder-k1d6.onrender.com/
+
+### For Local Development
+
+#### Prerequisites
 - Python 3.8 or higher
 - pip (Python package manager)
 - Modern web browser (Chrome, Firefox, Edge, Safari)
 
-### Step 1: Clone the Repository
+#### Step 1: Clone the Repository
 ```bash
 git clone https://github.com/YOUR_USERNAME/CityFinder.git
 cd CityFinder
@@ -129,7 +143,8 @@ The application will start on: **http://127.0.0.1:5000**
 
 ### For First-Time Users:
 
-1. **Open the website** in your browser: http://127.0.0.1:5000
+1. **Open the website** in your browser: https://city-finder-k1d6.onrender.com/
+   - Or locally: http://127.0.0.1:5000 (if running locally)
 2. **Allow location** when browser asks (click "My Location" button if needed)
 3. **Click any category button** (e.g., Restaurants)
 4. **See results** with distances
@@ -313,6 +328,22 @@ If you need help:
 - Bootstrap team for UI framework
 - OSRM for routing engine
 - Font Awesome for icons
+
+## 🌐 Links
+
+- **Live Application:** https://city-finder-k1d6.onrender.com/
+- **GitHub Repository:** https://github.com/YOUR_USERNAME/CityFinder
+- **Deployed on:** Render.com (Free Tier)
+
+---
+
+## 🎓 Academic Project
+
+This project was developed as part of a Web Programming course assignment.
+
+**Course:** Web Programming  
+**Deadline:** Thursday, 12 November 2026, 11:59 PM  
+**Status:** ✅ Completed and Deployed
 
 ---
 

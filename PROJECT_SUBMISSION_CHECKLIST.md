@@ -206,18 +206,24 @@ ls -la
 ```
 
 ### Step 2: Test the Application
+
+**Test Live App:**
+Visit: https://city-finder-k1d6.onrender.com/
+
+**Or Test Locally:**
 ```bash
 # Run the app
 python app.py
 
 # Open browser: http://127.0.0.1:5000
-# Test:
-# 1. Click "My Location"
-# 2. Click "Restaurants"
-# 3. Click "Get Directions"
-# 4. Try voice search
-# 5. Try help button
 ```
+
+**Test These Features:**
+1. Click "My Location"
+2. Click "Restaurants" 
+3. Check distances showing
+4. Click "Get Directions"
+5. Try city switcher
 
 ### Step 3: Verify Git Status
 ```bash
@@ -275,20 +281,33 @@ git push origin main
 
 ### What to Submit on LMS:
 
-**Submit:** Your GitHub repository URL
+**Submit:** Your GitHub repository URL + Live Demo URL
 
 **Format:**
 ```
-https://github.com/YOUR_USERNAME/CityFinder
+GitHub Repository: https://github.com/YOUR_USERNAME/CityFinder
+Live Demo: https://city-finder-k1d6.onrender.com/
 ```
 
 **Additional Info (if form has text box):**
 ```
 Project: CityFinder - Smart City Location Discovery
+Live Application: https://city-finder-k1d6.onrender.com/
+GitHub: https://github.com/YOUR_USERNAME/CityFinder
+
 Technologies: Python, Flask, OpenStreetMap API, Leaflet.js
-Features: Voice search, Distance display, Routing, Accessibility
-Commits: 6+ commits with clear messages
-README: Complete with installation and usage guide
+Features: 
+- Multi-city support (switch between cities)
+- Distance display and sorting
+- Built-in routing with turn-by-turn directions
+- Interactive map with Leaflet.js
+- 13 search categories
+- Mobile-responsive design
+- Deployed on Render (cloud hosting)
+
+Commits: 5+ commits with clear messages
+README: Complete with installation, usage guide, and live demo link
+Status: Deployed and fully functional
 ```
 
 ---
@@ -341,13 +360,13 @@ Before submitting, verify:
 ## 📊 Project Highlights to Mention
 
 ### 1. Exceptional Features
-- Voice search (speech recognition)
-- Text-to-speech instructions
-- Distance calculation and sorting
-- Built-in routing
-- Accessibility for uneducated users
-- Help tutorial system
-- Simple mode for elderly
+- **Multi-city support** - Switch between cities worldwide
+- **Distance calculation and sorting** - See nearest places first
+- **Built-in routing** - Turn-by-turn directions on map
+- **Interactive map** - Leaflet.js with markers and routes
+- **13 search categories** - Restaurants, hospitals, ATMs, etc.
+- **Mobile-responsive design** - Works on all devices
+- **Deployed to production** - Live at https://city-finder-k1d6.onrender.com/
 
 ### 2. Robust API Implementation
 - Timeout on all requests
